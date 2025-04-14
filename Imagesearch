@@ -1,0 +1,52 @@
+# 🚀 Install required packages quietly
+!pip install google-generativeai gradio requests --quiet
+
+# 📦 Import libraries
+import google.generativeai as genai
+import gradio as gr
+import requests
+
+# 🔑 API credentials (Insert your actual keys here)
+GEMINI_KEY = "AIzaSyDnMG3av2_FdnX8oD6l7Zfd_SMAK2PwGVw"
+CSE_KEY = "AIzaSyBnDeCvfQum-j017AdFip_VNyZHt6AQ-gM"
+CSE_ENGINE_ID = "30a5a426119f14634"
+
+# 🌐 Initialize Gemini configuration
+genai.configure(api_key=GEMINI_KEY)
+ai_model = genai.GenerativeModel("gemini-pro")
+
+# 🧠 Let Gemini rewrite user prompt into an effective search query
+def create_search_phrase(user_text):
+    prompt = f"Turn this sentence into a clear image search phrase: {user_text}"
+    result = ai_model.generate_content(prompt)
+    return result.text.strip()
+
+# 🔍 Use Google CSE to fetch image results
+def fetch_image_results(search_text):
+    search_url = "https://www.googleapis.com/customsearch/v1"
+    query_params = {
+        "q": search_text,
+        "cx": CSE_ENGINE_ID,
+        "key": CSE_KEY,
+        "searchType": "image",
+        "num": 5
+    }
+    result = requests.get(search_url, params=query_params).json()
+    return [item["link"] for item in result.get("items", [])]
+
+# 🎯 Complete search workflow: refine + fetch
+def perform_image_search(user_input):
+    refined = create_search_phrase(user_input)
+    return fetch_image_results(refined)
+
+# 🖼️ Build Gradio UI
+search_app = gr.Interface(
+    fn=perform_image_search,
+    inputs=gr.Textbox(lines=1, placeholder="What image are you looking for?"),
+    outputs=gr.Gallery(label="Image Results"),
+    title="Gemini AI Image Finder",
+    description="Type your idea and let Gemini & Google CSE fetch matching images."
+)
+
+# 🚀 Run the app with shareable link
+search_app.launch(share=True)
