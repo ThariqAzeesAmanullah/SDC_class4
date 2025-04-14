@@ -1,0 +1,30 @@
+# Install necessary packages quietly
+!pip install google-generativeai gradio --quiet
+
+# Import libraries
+import google.generativeai as genai
+import gradio as gr
+
+# 🔐 API Configuration (Insert your own Gemini API key)
+API_KEY = "AIzaSyDnMG3av2_FdnX8oD6l7Zfd_SMAK2PwGVw"  # Replace with your API key
+
+# Initialize Gemini with your API Key
+genai.configure(api_key=API_KEY)
+model = genai.GenerativeModel("gemini-pro")  # Free-tier Gemini model
+
+# 🧠 Define response function
+def get_reply(prompt):
+    result = model.generate_content(prompt)
+    return result.text
+
+# 🌐 Create Gradio UI
+chat_ui = gr.Interface(
+    fn=get_reply,
+    inputs=gr.Textbox(lines=2, placeholder="Type your message here..."),
+    outputs="text",
+    title="Gemini Assistant",
+    description="Talk to Gemini AI – powered by Google"
+)
+
+# 🚀 Launch the chatbot with a public link
+chat_ui.launch(share=True)
