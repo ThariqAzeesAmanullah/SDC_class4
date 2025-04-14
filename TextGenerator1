@@ -1,0 +1,26 @@
+# 📦 Install required packages silently
+!pip install transformers gradio torch --quiet
+
+# 📚 Import necessary modules
+from transformers import pipeline
+import gradio as gr
+
+# 🧠 Load a lightweight and fast GPT-2 variant
+text_gen_pipeline = pipeline("text-generation", model="distilgpt2")
+
+# 📝 Define function to create text based on user input
+def create_text(input_text):
+    output = text_gen_pipeline(input_text, max_length=50, num_return_sequences=1)
+    return output[0]['generated_text']
+
+# 🎨 Build Gradio UI
+app = gr.Interface(
+    fn=create_text,
+    inputs=gr.Textbox(lines=1, placeholder="Type your prompt here..."),
+    outputs=gr.Textbox(),
+    title="Quick AI Text Creator",
+    description="Provide a prompt and generate meaningful text using DistilGPT-2."
+)
+
+# 🚀 Launch the app with shareable access
+app.launch(share=True)
